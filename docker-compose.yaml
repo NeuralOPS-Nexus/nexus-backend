@@ -1,0 +1,55 @@
+services:
+  # The AI Brain (FastAPI)
+  nucleus:
+    image: nexus-nucleus:1.0
+    container_name: nexus-nucleus
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/nucleus:/nucleus
+    environment:
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - POSTGRES_URL=postgresql+asyncpg://admin:password@postgres:5432/nucleus_db
+      - PYTHONPATH=/nucleus
+    networks:
+      - nexus-network
+    depends_on:
+      - chromadb
+      - postgres
+    working_dir: /nucleus
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
+
+  # The Vector Database (Unstructured Search)
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: nexus-chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - nexus-network
+
+  # The Relational Database (Structured Data)
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexus-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=nucleus_db
+    ports:
+      - "5433:5432" # Mapped to 5433 locally to avoid conflict with local postgres
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexus-network
+
+networks:
+  nexus-network:
+    driver: bridge
