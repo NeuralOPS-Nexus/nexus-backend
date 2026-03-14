@@ -1,0 +1,65 @@
+name: release
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  release:
+    name: Release with Go ${{ matrix.go-version }}
+    environment: release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [1.26.1]
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          version: "1.34.0"
+
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build DEB and RPM packages
+        run: misc/scripts/release_package.sh
+        env:
+          STATS_ENDPOINT: ${{ secrets.STATS_ENDPOINT }}
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
+
+      - name: Release on Github
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: latest
+          args: release --rm-dist --release-notes=misc/release/notes.md
+        env:
+          # note custom secret here since we need access to Centrifugo Homebrew repo.
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          STATS_ENDPOINT: ${{ secrets.STATS_ENDPOINT }}
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
+
+      - name: Release on Packagecloud
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+        run: misc/scripts/release_packagecloud.sh
+
+      - uses: bufbuild/buf-push-action@v1
+        with:
+          buf_token: ${{ secrets.BUF_TOKEN }}

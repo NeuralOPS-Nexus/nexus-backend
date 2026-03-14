@@ -1,0 +1,136 @@
+project_name: centrifugo
+release:
+  github:
+    owner: centrifugal
+    name: centrifugo
+  name_template: '{{.Tag}}'
+  prerelease: auto
+  draft: true
+  extra_files:
+    - glob: ./PACKAGES/*.deb
+    - glob: ./PACKAGES/*.rpm
+    - glob: ./PACKAGES/*.txt
+brews:
+  -
+    tap:
+      owner: centrifugal
+      name: homebrew-centrifugo
+    folder: Formula
+    description: "Scalable real-time messaging server in a language-agnostic way"
+    commit_author:
+      name: Alexander Emelin
+      email: frvzmb@gmail.com
+    install: bin.install "centrifugo"
+    homepage: "https://github.com/centrifugal/centrifugo"
+builds:
+- goos:
+  - linux
+  - darwin
+  - freebsd
+  - windows
+  goarch:
+  - amd64
+  - "386"
+  - arm  
+  - arm64
+  ignore:
+    - goos: darwin
+      goarch: "386"
+    - goos: windows
+      goarch: "386"
+    - goos: freebsd
+      goarch: "386"
+    - goos: darwin
+      goarch: arm
+    - goos: windows
+      goarch: arm
+    - goos: freebsd
+      goarch: arm
+    - goos: windows
+      goarch: arm64
+    - goos: freebsd
+      goarch: arm64
+  main: .
+  ldflags: -s -w -X github.com/centrifugal/centrifugo/v6/internal/build.Version={{.Version}} -X github.com/centrifugal/centrifugo/v6/internal/build.UsageStatsEndpoint={{ .Env.STATS_ENDPOINT }} -X github.com/centrifugal/centrifugo/v6/internal/build.UsageStatsToken={{ .Env.STATS_TOKEN }}
+  binary: centrifugo
+  env:
+    # https://github.com/goreleaser/goreleaser/issues/225
+    - CGO_ENABLED=0
+archives:
+  - id: centrifugo
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: tar.gz
+    files:
+    - LICENSE*
+    - README*
+    - CHANGELOG*
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+dist: dist
+signs:
+  -
+    cmd: gpg
+    args:
+    - --output
+    - $signature
+    - --detach-sig
+    - $artifact
+    signature: ${artifact}.sig
+    artifacts: none
+dockers:
+  - ids:
+      - centrifugo
+    goos: linux
+    goarch: amd64
+    image_templates:
+    - "centrifugo/centrifugo:{{ .Tag }}-amd64"
+    - "centrifugo/centrifugo:v{{ .Major }}-amd64"
+    - "centrifugo/centrifugo:v{{ .Major }}.{{ .Minor }}-amd64"
+    - "centrifugo/centrifugo:latest-amd64"
+    use: buildx
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.name={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--label=org.opencontainers.image.source={{.GitURL}}"
+    - "--platform=linux/amd64"
+  - ids:
+      - centrifugo
+    goos: linux
+    goarch: arm64
+    image_templates:
+    - "centrifugo/centrifugo:{{ .Tag }}-arm64v8"
+    - "centrifugo/centrifugo:v{{ .Major }}-arm64v8"
+    - "centrifugo/centrifugo:v{{ .Major }}.{{ .Minor }}-arm64v8"
+    - "centrifugo/centrifugo:latest-arm64v8"
+    use: buildx
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.name={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--label=org.opencontainers.image.source={{.GitURL}}"
+    - "--platform=linux/arm64/v8"
+docker_manifests:
+  - name_template: centrifugo/centrifugo:{{ .Tag }}
+    image_templates:
+      - centrifugo/centrifugo:{{ .Tag }}-arm64v8
+      - centrifugo/centrifugo:{{ .Tag }}-amd64
+  - name_template: centrifugo/centrifugo:v{{ .Major }}
+    image_templates:
+      - centrifugo/centrifugo:{{ .Tag }}-arm64v8
+      - centrifugo/centrifugo:{{ .Tag }}-amd64
+  - name_template: centrifugo/centrifugo:v{{ .Major }}.{{ .Minor }}
+    image_templates:
+      - centrifugo/centrifugo:{{ .Tag }}-arm64v8
+      - centrifugo/centrifugo:{{ .Tag }}-amd64
+  - name_template: centrifugo/centrifugo:latest
+    image_templates:
+      - centrifugo/centrifugo:{{ .Tag }}-arm64v8
+      - centrifugo/centrifugo:{{ .Tag }}-amd64

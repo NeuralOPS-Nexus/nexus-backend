@@ -1,0 +1,30 @@
+package health
+
+import (
+	"net/http"
+
+	"github.com/centrifugal/centrifuge"
+)
+
+// Config of health check handler.
+type Config struct{}
+
+// Handler handles health endpoint.
+type Handler struct {
+	node   *centrifuge.Node
+	config Config
+}
+
+// NewHandler creates new Handler.
+func NewHandler(n *centrifuge.Node, c Config) *Handler {
+	h := &Handler{
+		node:   n,
+		config: c,
+	}
+	return h
+}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(`{}`))
+}

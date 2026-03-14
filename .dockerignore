@@ -1,0 +1,16 @@
+# Ignore database volumes
+postgres_data/
+chroma_data/
+
+# Ignore Python junk
+__pycache__/
+*.pyc
+.venv/
+env/
+
+# Ignore Git
+.git/
+.github/
+
+# Ignore other node/submodule junk
+node_modules/
