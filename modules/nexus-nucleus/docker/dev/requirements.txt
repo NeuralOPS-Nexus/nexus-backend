@@ -3,7 +3,7 @@ fastapi[standard]
 pydantic-settings
 
 # Real-time Transport 
-centrifugal-python
+centrifuge-python
 PyJWT
 cryptography
 

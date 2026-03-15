@@ -224,3 +224,5 @@ modules/nexus-transport/misc/redis_*/
 modules/nexus-transport/misc/nats_cluster/nats_logs/
 chroma_data/
 postgres_data/
+data/chroma_data
+data/postgres_data

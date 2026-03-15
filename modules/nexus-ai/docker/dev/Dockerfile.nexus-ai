@@ -13,7 +13,7 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy from the context root (NeuralOPSNexus/)
-COPY apps/nucleus/docker/dev/requirements.txt .
+COPY modules/nexus-ai/docker/dev/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Final Runtime (The clean, dev-ready engine)
@@ -31,8 +31,8 @@ RUN set -eux; \
     getent passwd ubuntu >/dev/null 2>&1 || adduser --disabled-password --gecos '' ubuntu; \
     usermod -aG sudo ubuntu; \
     grep -q '^%sudo ALL=(ALL) NOPASSWD:ALL' /etc/sudoers || echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; \
-    # Use the /nucleus path as we planned for the volume
-    mkdir -p /nucleus && chown ubuntu:ubuntu /nucleus; \
+    # Use the /nexus-ai path as we planned for the volume
+    mkdir -p /nexus-ai && chown ubuntu:ubuntu /nexus-ai; \
     rm -rf /var/lib/apt/lists/*
 
 # 2. Copy the Venv
@@ -41,12 +41,12 @@ ENV VIRTUAL_ENV=/opt/venv/nexus-env
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # 3. Environment & Workspace
-WORKDIR /nucleus
+WORKDIR /nexus-ai
 USER ubuntu
 
-# Ensure local Python imports from /nucleus work
-ENV PYTHONPATH=/nucleus
+# Ensure local Python imports from /nexus-ai work
+ENV PYTHONPATH=/nexus-ai
 
 # 4. Command
-# Uvicorn watches /nucleus/app for changes via the volume
+# Uvicorn watches /nexus-ai/app for changes via the volume
 # CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]

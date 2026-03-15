@@ -1,49 +1,55 @@
 services:
-  # NUCLEUS: The Orchestrator (Auth, Projects, Chat-Server)
+  # NUCLEUS: The Orchestrator
   nucleus:
-    build:
-      context: ./apps/nucleus
+    image: nexus-nucleus:2.0
     container_name: nexus-nucleus
     ports:
-      - "8000:8000"
+      - "8003:8000"
     volumes:
-      - ./apps/nucleus:/nucleus
+      - ./modules/nexus-nucleus:/nexus-nucleus
     environment:
       - POSTGRES_URL=${POSTGRES_URL}
       - NEXUS_AI_URL=${NEXUS_AI_URL}
       - CENTRIFUGO_API_URL=${CENTRIFUGO_API_URL}
       - CENTRIFUGO_API_KEY=${CENTRIFUGO_API_KEY}
       - CENTRIFUGO_HMAC_SECRET=${CENTRIFUGO_HMAC_SECRET}
-      - PYTHONPATH=/nucleus
+      - PYTHONPATH=/nexus-nucleus
     networks:
       - nexus-network
     depends_on:
       - postgres
       - realtime
-    working_dir: /nucleus
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
-
-  # NEXUS-AI: The Worker (LiteLLM, Vector Search, RAG)
+    working_dir: /nexus-nucleus
+    # command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
+    command: python -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload
+  # NEXUS-AI: The Worker
   nexus-ai:
-    build:
-      context: ./apps/nexus-ai
+    image: nexus-ai:2.0
     container_name: nexus-ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./modules/nexus-ai:/nexus-ai
     environment:
       - CHROMA_HOST=${CHROMA_HOST}
       - CHROMA_PORT=${CHROMA_PORT}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - MODEL_NAME=${MODEL_NAME}
+      - PYTHONPATH=/nexus-ai
     networks:
       - nexus-network
     depends_on:
       - chromadb
-    working_dir: /app
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-
-  # REALTIME: The Transport Layer (Centrifugo)
+    working_dir: /nexus-ai
+    # command: ["python", "-m", "uvicorn","-m","app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    # command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "export PYTHONPATH=$PYTHONPATH:/nexus-ai && 
+             python3 -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload"
+  # REALTIME: Transport
   realtime:
-    image: nexus-transport:1.0
+    image: nexus-transport:2.0
     container_name: nexus-transport
     ports:
       - "8002:8000"
@@ -57,19 +63,17 @@ services:
     networks:
       - nexus-network
 
-  # CHROMADB: Vector Storage
+  # CHROMADB & POSTGRES remain the same...
   chromadb:
     image: chromadb/chroma:latest
     container_name: nexus-chroma
     volumes:
-      - ./chroma_data:/chroma/chroma
+      - ./data/chroma_data:/chroma/chroma
     environment:
       - IS_PERSISTENT=TRUE
-      - ANONYMIZED_TELEMETRY=FALSE
     networks:
       - nexus-network
 
-  # POSTGRES: Relational Storage
   postgres:
     image: postgres:16-alpine
     container_name: nexus-postgres
@@ -81,7 +85,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - ./data/postgres_data:/var/lib/postgresql/data
     networks:
       - nexus-network
 
