@@ -2,25 +2,23 @@
 fastapi[standard]
 pydantic-settings
 
-# Real-time Transport 
+# Real-time Transport (To UI)
 centrifuge-python
 PyJWT
-cryptography
 
-# Database & ORM (Structured Memory Only)
-sqlmodel                # For Users, Projects, and Chat History
+# Database & State (SQLModel)
+sqlmodel
 asyncpg
-psycopg2-binary
 alembic
 
-# Communication
-httpx                   # To call Nexus-AI
+# Orchestration (Talking to Nexus-AI & MCP)
+httpx               # Crucial: Nucleus calls Nexus-AI via HTTP
+mcp                 # Nucleus acts as the MCP Host
+fastapi-mcp         # To expose internal tools
 
-# Identity & Security
+# Identity
 passlib[bcrypt]
 
-# Elite Dev Tools
+# Dev Tools
 rich
 ipython
-pytest
-pytest-asyncio
