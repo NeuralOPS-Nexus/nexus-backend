@@ -29,3 +29,10 @@ class ChatLine(NucleusBase, table=True):
     # Snippet support for interactive UI
     snippet_type: Optional[str] = None # terminal, graph, code, form
     snippet_data: Optional[str] = None # JSON string of structured data
+
+class ReadMarker(NucleusBase, table=True):
+    """Tracks the last message seen by a user in a topic."""
+    __table_args__ = {"schema": "nucleus"}
+    user_id: uuid.UUID = Field(foreign_key="nucleus.user.id")
+    topic_id: uuid.UUID = Field(foreign_key="nucleus.chattopic.id")
+    last_read_line_id: uuid.UUID # ID of the last ChatLine read
