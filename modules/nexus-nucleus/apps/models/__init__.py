@@ -9,12 +9,11 @@
 # target_metadata = SQLModel.metadata
 
 
-from .base import NucleusBase
-from .governance import User, Human, Group, Permission, PermissionMapping, GroupUserMapping
+from apps.db.base import Base
+from apps.modules.governance.models import (
+    User, Human, Group, Permission, PermissionMapping, GroupUserMapping
+)
+# Import other module models here as you convert them
 
-# Temporarily disabled to isolate the base setup
-# from .intelligence import ...
-# from .workspace import ...
-
-from sqlmodel import SQLModel
-target_metadata = SQLModel.metadata
+# This is what env.py will import
+target_metadata = Base.metadata

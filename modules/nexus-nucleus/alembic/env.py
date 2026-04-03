@@ -1,29 +1,23 @@
 import os
 import sys
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 from alembic import context
-from sqlmodel import SQLModel
 
 # Ensure the app code is discoverable
 sys.path.append(os.getcwd())
 
-# Import your metadata
+# 1. IMPORT YOUR NEW METADATA (From our SQLAlchemy 2.0 Base)
 from apps.models import target_metadata
 
 config = context.config
 
-# 1. PULL FROM YOUR ENV
-# Your env has: POSTGRES_URL=postgresql+asyncpg://admin:password@postgres:5432/nucleus_db
+# 2. PULL FROM YOUR ENV
 raw_url = os.getenv("POSTGRES_URL")
 
 if raw_url:
-    # 2. CONVERT ASYNC TO SYNC
-    # Alembic needs psycopg2 to run migrations.
+    # Alembic needs psycopg2 (sync) even if the app uses asyncpg
     sync_url = raw_url.replace("asyncpg", "psycopg2")
-    
-    # 3. INJECT INTO CONFIG
-    # This replaces the %(POSTGRES_URL)s placeholder in alembic.ini
     config.set_main_option("sqlalchemy.url", sync_url)
 
 if config.config_file_name is not None:
@@ -38,8 +32,9 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        # Ensure the 'nucleus' schema exists
-        connection.execute("CREATE SCHEMA IF NOT EXISTS nucleus;")
+        # 3. USE text() FOR SCHEMA CREATION (SQLAlchemy 2.0 standard)
+        connection.execute(text("CREATE SCHEMA IF NOT EXISTS nucleus;"))
+        connection.commit() # Ensure schema is committed before migrations start
         
         context.configure(
             connection=connection, 
@@ -51,7 +46,6 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
-# Standard offline/online check
 if context.is_offline_mode():
     # Setup for offline if needed
     pass
