@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
-	"path/filepath"
 	"go/token"
 	"os"
 	"reflect"
@@ -107,21 +106,14 @@ func getDisplayType(t reflect.Type) (string, bool) {
 // and field comments use "pkg.TypeName.FieldName".
 func ExtractStructCommentsFromDir(dir string) (map[string]string, error) {
 	fset := token.NewFileSet()
-	entries, err := os.ReadDir(dir)
+	pkgs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
 	comments := make(map[string]string)
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".go" || strings.HasSuffix(entry.Name(), "_test.go") {
-			continue
-		}
-		file, err := parser.ParseFile(fset, filepath.Join(dir, entry.Name()), nil, parser.ParseComments)
-		if err != nil {
-			return nil, err
-		}
-		pkgName := file.Name.Name
-		{
+	for _, pkg := range pkgs {
+		pkgName := pkg.Name
+		for _, file := range pkg.Files {
 			for _, decl := range file.Decls {
 				genDecl, ok := decl.(*ast.GenDecl)
 				if !ok || genDecl.Tok != token.TYPE {

@@ -3,6 +3,9 @@ services:
   nucleus:
     image: nexus-nucleus:2.0
     container_name: nexus-nucleus
+    build:
+      context: ./modules/nexus-nucleus
+      dockerfile: Dockerfile
     ports:
       - "8003:8000"
     volumes:
@@ -21,11 +24,15 @@ services:
       - realtime
     working_dir: /nexus-nucleus
     # command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
-    command: python -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload
+    # command: python -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload
+    command: tail -f /dev/null
   # NEXUS-AI: The Worker
   nexus-ai:
     image: nexus-ai:2.0
     container_name: nexus-ai
+    build:
+      context: ./modules/nexus-ai
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
@@ -49,8 +56,12 @@ services:
              python3 -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload"
   # REALTIME: Transport
   realtime:
-    image: nexus-transport:2.0
+    image: noamanfaisal/nexus-transport:6.0
     container_name: nexus-transport
+    # build:
+    #   context: ./modules/nexus-transport
+    #   dockerfile: Dockerfile.arm64 for arm64
+    #   dockerfile: Dockerfile
     ports:
       - "8002:8000"
     environment:

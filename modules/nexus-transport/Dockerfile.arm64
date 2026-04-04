@@ -12,10 +12,10 @@ RUN go mod download
 
 # 2. Copy source and Build with Version Injection
 COPY . .
-# RUN go build -ldflags="-s -w -X 'github.com/centrifugo/centrifugo/v6/internal/build.Version=v6.6.2-nexus'" \
-#    -o nexus-transport .
-# Note the 'l' in centrifugal
+
+# Build targeting the root main.go with the corrected 'centrifugal' namespace
 RUN go build -ldflags="-s -w -X 'github.com/centrifugal/centrifugo/v6/internal/build.Version=v6.6.2-nexus'" -o nexus-transport .
+
 # STAGE 2: The Production Image (Hardened 2026 Alpine)
 FROM alpine:3.21
 
@@ -43,4 +43,3 @@ WORKDIR /nexus
 
 # No EXPOSE and no ENTRYPOINT as per your requirement.
 # The user must define the command in docker-compose.yml.
-

@@ -8,20 +8,11 @@ For details, go to the [Centrifugo documentation site](https://centrifugal.dev).
 
 ## What's changed
 
-This release contains breaking change to address CVE discovered in [Dynamic JWKs endpoint](https://centrifugal.dev/docs/server/authentication#dynamic-jwks-endpoint) feature. If you use that feature you need to update Centrifugo configuration. See fixes section for the details.
-
-### Improvements
-
-* This release is the first built with Go 1.26. This version of the Go language includes a new garbage collector called the [Green Tea garbage collector](https://go.dev/doc/go1.26#new-garbage-collector). This may affect the performance of your Centrifugo installation; in most cases, we expect the impact to be positive. If you notice any performance changes in Centrifugo after upgrading to this release, please let us know in the community rooms. More information about the new GC can be found [here](https://go.dev/blog/greenteagc).
-* Updated the Alpine image to 3.22 in the Dockerfile.
-* Improve lint layout to improve local DX
-
 ### Fixes
 
-* [CVE-2026-32301](https://github.com/centrifugal/centrifugo/security/advisories/CVE-2026-32301) Fixed SSRF vulnerability in [Dynamic JWKS endpoint](https://centrifugal.dev/docs/server/authentication#dynamic-jwks-endpoint) feature. When using JWKS endpoint URL templates with placeholders extracted from JWT claims via `issuer_regex` or `audience_regex`, an attacker could craft a JWT with malicious claim values to redirect JWKS key fetches to an attacker-controlled server, enabling token forgery. **Action required:** if you use dynamic JWKS endpoints, update your `issuer_regex`/`audience_regex` patterns so that named capture groups used in the JWKS URL template contain only an explicit list of allowed literal values (e.g., `(?P<tenant>tenant1|tenant2|tenant3)` instead of `(?P<tenant>.+)`). Centrifugo will now reject configurations where these groups allow arbitrary input. A temporary escape hatch `client.token.insecure_skip_jwks_endpoint_safety_check` option is available but will be removed in future releases.
-* The Go version update (1.25.7 to 1.26.1) and update of Go x/net library allow inheriting fixes for several recently discovered CVE.
+* Transport write must return after data written [#1106](https://github.com/centrifugal/centrifugo/pull/1106). This was noticed in CI after a [pull request](https://github.com/centrifugal/centrifuge-js/pull/349) made by @phront3nd3r. This is a regression from v6.6.0 due to malformed buffer reuse in WriteManyFn callback of client writer. This resulted into broken data written into connection – thus connection issues. The problem was reproducing in HTTP Stream and SSE transports (bidirectional and unidirectional). WebSocket, Webtransport, uni GRPC were not affected because they already return once data is written into connection. 
 
 ### Miscellaneous
 
-* This release is built with Go 1.26.1
-* See also the corresponding [Centrifugo PRO release](https://github.com/centrifugal/centrifugo-pro/releases/tag/v6.6.6).
+* This release is built with Go 1.25.7
+* See also the corresponding [Centrifugo PRO release](https://github.com/centrifugal/centrifugo-pro/releases/tag/v6.6.2).

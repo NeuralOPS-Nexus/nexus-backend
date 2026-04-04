@@ -1,4 +1,4 @@
-# Stage 1: Build dependencies (The heavy lifting)
+# Stage 1: Build dependencies (Root-owned during build)
 FROM python:3.11-slim as builder
 
 WORKDIR /build
@@ -12,41 +12,42 @@ ENV VIRTUAL_ENV=/opt/venv/nexus-env
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Copy from the context root (NeuralOPSNexus/)
 COPY modules/nexus-nucleus/docker/dev/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Final Runtime (The clean, dev-ready engine)
+# Stage 2: Final Runtime (User-owned for Development)
 FROM python:3.11-slim
 
-# 1. Setup 'ubuntu' user, sudo, AND your dev tools (micro, tmux)
+# 1. Setup 'ubuntu' user, sudo, and dev tools
 RUN set -eux; \
     apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     libpq-dev \
-    # Dev binaries go here, NOT in requirements.txt
     micro \
     tmux \
     curl; \
+    # Ensure ubuntu user exists
     getent passwd ubuntu >/dev/null 2>&1 || adduser --disabled-password --gecos '' ubuntu; \
     usermod -aG sudo ubuntu; \
-    grep -q '^%sudo ALL=(ALL) NOPASSWD:ALL' /etc/sudoers || echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; \
-    # Use the /nexus-nucleus path as we planned for the volume
-    mkdir -p /nexus-nucleus && chown ubuntu:ubuntu /nexus-nucleus; \
+    # Grant passwordless sudo for dev convenience
+    echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; \
+    # Pre-create the target directories
+    mkdir -p /nexus-nucleus /opt/venv/nexus-env; \
     rm -rf /var/lib/apt/lists/*
 
-# 2. Copy the Venv
-COPY --from=builder /opt/venv/nexus-env /opt/venv/nexus-env
+# 2. Copy the Venv and SET OWNERSHIP to ubuntu
+COPY --from=builder --chown=ubuntu:ubuntu /opt/venv/nexus-env /opt/venv/nexus-env
+
+# 3. Final Permissions: Hand over the workspace and venv to ubuntu
+RUN chown -R ubuntu:ubuntu /nexus-nucleus /opt/venv/nexus-env
+
+# 4. Environment & Workspace
 ENV VIRTUAL_ENV=/opt/venv/nexus-env
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV PYTHONPATH=/nexus-nucleus
 
-# 3. Environment & Workspace
 WORKDIR /nexus-nucleus
 USER ubuntu
 
-# Ensure local Python imports from /nexus-nucleus work
-ENV PYTHONPATH=/nexus-nucleus
-
-# 4. Command
-# Uvicorn watches /nexus-nucleus/app for changes via the volume
-# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
+# Stay alive for manual interaction/debugging
+# CMD ["tail", "-f", "/dev/null"]
