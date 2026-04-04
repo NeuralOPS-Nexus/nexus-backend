@@ -30,6 +30,9 @@ services:
   nexus-ai:
     image: nexus-ai:2.0
     container_name: nexus-ai
+    build:
+      context: ./modules/nexus-ai
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
@@ -53,8 +56,12 @@ services:
              python3 -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload"
   # REALTIME: Transport
   realtime:
-    image: noamanfaisal/nexus-transport:5.0-${ARCH:-amd64}
+    image: noamanfaisal/nexus-transport:6.0
     container_name: nexus-transport
+    # build:
+    #   context: ./modules/nexus-transport
+    #   dockerfile: Dockerfile.arm64 for arm64
+    #   dockerfile: Dockerfile
     ports:
       - "8002:8000"
     environment:
