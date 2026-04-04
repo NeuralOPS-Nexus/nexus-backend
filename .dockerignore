@@ -14,3 +14,12 @@ env/
 
 # Ignore other node/submodule junk
 node_modules/
+
+# Ignore local database data
+data/
+data/postgres_data
+data/chroma_data
+
+# Ignore other modules when building transport
+modules/nexus-ai
+modules/nexus-nucleus

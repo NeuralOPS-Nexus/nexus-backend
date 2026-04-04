@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
+# build/
 develop-eggs/
 dist/
 downloads/
@@ -207,21 +207,60 @@ marimo/_lsp/
 __marimo__/
 
 # --- Nexus Transport (Centrifugo) Vendor Rules ---
-modules/nexus-transport/centrifugo
-modules/nexus-transport/config.*
-modules/nexus-transport/BUILDS/
-modules/nexus-transport/PACKAGES/
-modules/nexus-transport/vendor/
-modules/nexus-transport/tmp/
-modules/nexus-transport/internal/ultra/
-modules/nexus-transport/FlameGraph/
-modules/nexus-transport/torch.svg
-modules/nexus-transport/protoc-3*
+# modules/nexus-transport/centrifugo
+# modules/nexus-transport/config.*
+# modules/nexus-transport/BUILDS/
+# modules/nexus-transport/PACKAGES/
+# modules/nexus-transport/vendor/
+# modules/nexus-transport/tmp/
+# modules/nexus-transport/internal/ultra/
+# modules/nexus-transport/FlameGraph/
+# modules/nexus-transport/torch.svg
+# modules/nexus-transport/protoc-3*
 
 # Database & Cluster Test Data (Local Dev Junk)
-modules/nexus-transport/misc/clickhouse_cluster/clickhouse*
-modules/nexus-transport/misc/redis_*/
-modules/nexus-transport/misc/nats_cluster/nats_logs/
+# modules/nexus-transport/misc/clickhouse_cluster/clickhouse*
+# modules/nexus-transport/misc/redis_*/
+# modules/nexus-transport/misc/nats_cluster/nats_logs/
+# --- Binaries & Build Artifacts ---
+# centrifugo
+# nexus-transport
+# nexus-transpose
+BUILDS/
+PACKAGES/
+tmp/
+bin/
+
+# --- Config & Secrets ---
+config.json
+config.yaml
+config.toml
+config.*.json
+config.*.yaml
+config.*.toml
+.env
+*.env
+
+# --- Go Internal & Junk ---
+# vendor/
+# internal/ultra/
+# pkg/
+*.log
+*.prof
+*.out
+
+# --- Dev Tooling & IDE ---
+.DS_Store
+.vscode/
+.idea/
+.venv/
+*.orig
+
+# --- Local Infrastructure Data ---
+misc/clickhouse_cluster/
+misc/redis_*/
+misc/nats_cluster/
+data/
 chroma_data/
 postgres_data/
 data/chroma_data
