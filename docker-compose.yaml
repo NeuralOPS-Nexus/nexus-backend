@@ -50,7 +50,7 @@ services:
              python3 -m uvicorn apps.main:app --host 0.0.0.0 --port 8000 --reload"
   # REALTIME: Transport
   realtime:
-    image: nexus-transport:2.0
+    image: noamanfaisal/nexus-transport:5.0
     container_name: nexus-transport
     ports:
       - "8002:8000"

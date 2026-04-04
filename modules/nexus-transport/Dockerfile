@@ -1,0 +1,46 @@
+# STAGE 1: The Builder (High-Performance Go 1.26)
+FROM golang:1.26-alpine AS builder
+
+# Install git for dependency fetching
+RUN apk add --no-cache git
+
+WORKDIR /app
+
+# 1. Optimize Caching: Download dependencies first
+COPY go.mod go.sum ./
+RUN go mod download
+
+# 2. Copy source and Build with Version Injection
+COPY . .
+# RUN go build -ldflags="-s -w -X 'github.com/centrifugo/centrifugo/v6/internal/build.Version=v6.6.2-nexus'" \
+#    -o nexus-transport .
+# Note the 'l' in centrifugal
+RUN go build -ldflags="-s -w -X 'github.com/centrifugal/centrifugo/v6/internal/build.Version=v6.6.2-nexus'" -o nexus-transport .
+# STAGE 2: The Production Image (Hardened 2026 Alpine)
+FROM alpine:3.21
+
+# 1. Security Identity
+ARG USER=nexus
+ARG UID=1000
+ARG GID=1000
+RUN addgroup -S -g $GID $USER && \
+    adduser -S -G $USER -u $UID $USER
+
+# 2. System Hardening
+RUN apk --no-cache upgrade && \
+    apk --no-cache add ca-certificates && \
+    update-ca-certificates
+
+# 3. Application Placement
+# We put it in /usr/local/bin so it's globally available in the $PATH
+COPY --from=builder /app/nexus-transport /usr/local/bin/nexus-transport
+
+# Ensure the binary is executable
+RUN chmod +x /usr/local/bin/nexus-transport
+
+USER $USER
+WORKDIR /nexus
+
+# No EXPOSE and no ENTRYPOINT as per your requirement.
+# The user must define the command in docker-compose.yml.
+
