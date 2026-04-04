@@ -3,6 +3,9 @@ services:
   nucleus:
     image: nexus-nucleus:2.0
     container_name: nexus-nucleus
+    build:
+      context: ./modules/nexus-nucleus
+      dockerfile: Dockerfile
     ports:
       - "8003:8000"
     volumes:
