@@ -1,7 +1,8 @@
 import uuid
 from enum import Enum
 from typing import Optional, List
-from sqlalchemy import String, ForeignKey, UniqueConstraint, Boolean, Enum as SAEnum
+from sqlalchemy import String, ForeignKey, UniqueConstraint, \
+    Boolean, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from apps.db.base import BaseModel
@@ -45,10 +46,10 @@ class User(BaseModel):
     )
 
     # M2M Relationships
-    groups: Mapped[List["Group"]] = relationship(
-        secondary="nucleus.group_user_mapping", 
-        back_populates="users"
-    )
+    # groups: Mapped[List["Group"]] = relationship(
+    #     secondary="nucleus.group_user_mapping", 
+    #     back_populates="users"
+    # )
 
 
 class Human(BaseModel):
@@ -71,65 +72,65 @@ class Human(BaseModel):
     user: Mapped["User"] = relationship(back_populates="human_profile")
 
 
-class Group(Base, TenantMixin, TimestampMixin):
-    __tablename__ = "group"
-    __table_args__ = {"schema": "nucleus"}
+# class Group(BaseModel):
+#     __tablename__ = "group"
+#     __table_args__ = {"schema": "nucleus"}
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(String(100))
-    description: Mapped[Optional[str]] = mapped_column(String(255))
+#     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+#     name: Mapped[str] = mapped_column(String(100))
+#     description: Mapped[Optional[str]] = mapped_column(String(255))
 
-    users: Mapped[List["User"]] = relationship(
-        secondary="nucleus.group_user_mapping", 
-        back_populates="groups"
-    )
-    permissions: Mapped[List["Permission"]] = relationship(
-        secondary="nucleus.permission_mapping", 
-        back_populates="groups"
-    )
-
-
-class Permission(Base, TimestampMixin):
-    __tablename__ = "permission"
-    __table_args__ = {"schema": "nucleus"}
-
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    code: Mapped[str] = mapped_column(String(50), unique=True) # e.g., "can_manage_kb"
-    description: Mapped[str] = mapped_column(String(255))
-
-    groups: Mapped[List["Group"]] = relationship(
-        secondary="nucleus.permission_mapping", 
-        back_populates="permissions"
-    )
+#     users: Mapped[List["User"]] = relationship(
+#         secondary="nucleus.group_user_mapping", 
+#         back_populates="groups"
+#     )
+#     permissions: Mapped[List["Permission"]] = relationship(
+#         secondary="nucleus.permission_mapping", 
+#         back_populates="groups"
+#     )
 
 
-# --- MANY-TO-MANY MAPPING TABLES ---
+# class Permission(Base, TimestampMixin):
+#     __tablename__ = "permission"
+#     __table_args__ = {"schema": "nucleus"}
 
-class PermissionMapping(Base):
-    """RBAC Logic: Links Groups to their specific Rights."""
-    __tablename__ = "permission_mapping"
-    __table_args__ = {"schema": "nucleus"}
+#     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+#     code: Mapped[str] = mapped_column(String(50), unique=True) # e.g., "can_manage_kb"
+#     description: Mapped[str] = mapped_column(String(255))
 
-    group_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("nucleus.group.id", ondelete="CASCADE"), 
-        primary_key=True
-    )
-    permission_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("nucleus.permission.id", ondelete="CASCADE"), 
-        primary_key=True
-    )
+#     groups: Mapped[List["Group"]] = relationship(
+#         secondary="nucleus.permission_mapping", 
+#         back_populates="permissions"
+#     )
 
 
-class GroupUserMapping(Base):
-    """Links Users to Groups."""
-    __tablename__ = "group_user_mapping"
-    __table_args__ = {"schema": "nucleus"}
+# # --- MANY-TO-MANY MAPPING TABLES ---
 
-    group_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("nucleus.group.id", ondelete="CASCADE"), 
-        primary_key=True
-    )
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("nucleus.user.id", ondelete="CASCADE"), 
-        primary_key=True
-    )
+# class PermissionMapping(Base):
+#     """RBAC Logic: Links Groups to their specific Rights."""
+#     __tablename__ = "permission_mapping"
+#     __table_args__ = {"schema": "nucleus"}
+
+#     group_id: Mapped[uuid.UUID] = mapped_column(
+#         ForeignKey("nucleus.group.id", ondelete="CASCADE"), 
+#         primary_key=True
+#     )
+#     permission_id: Mapped[uuid.UUID] = mapped_column(
+#         ForeignKey("nucleus.permission.id", ondelete="CASCADE"), 
+#         primary_key=True
+#     )
+
+
+# class GroupUserMapping(Base):
+#     """Links Users to Groups."""
+#     __tablename__ = "group_user_mapping"
+#     __table_args__ = {"schema": "nucleus"}
+
+#     group_id: Mapped[uuid.UUID] = mapped_column(
+#         ForeignKey("nucleus.group.id", ondelete="CASCADE"), 
+#         primary_key=True
+#     )
+#     user_id: Mapped[uuid.UUID] = mapped_column(
+#         ForeignKey("nucleus.user.id", ondelete="CASCADE"), 
+#         primary_key=True
+#     )

@@ -32,20 +32,21 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        # 3. USE text() FOR SCHEMA CREATION (SQLAlchemy 2.0 standard)
+        # 1. CREATE BOTH SCHEMAS (nucleus for core, history for logs)
         connection.execute(text("CREATE SCHEMA IF NOT EXISTS nucleus;"))
-        connection.commit() # Ensure schema is committed before migrations start
+        connection.execute(text("CREATE SCHEMA IF NOT EXISTS history;"))
+        connection.commit() 
         
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
-            version_table_schema="nucleus",
-            include_schemas=True
+            version_table_schema="nucleus", # Keep migration history in the core schema
+            include_schemas=True,           # Tell Alembic to scan both schemas
         )
 
         with context.begin_transaction():
             context.run_migrations()
-
+            
 if context.is_offline_mode():
     # Setup for offline if needed
     pass

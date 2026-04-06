@@ -7,21 +7,6 @@ class Base(DeclarativeBase):
     """The SQLAlchemy 2.0 Master Base."""
     pass
 
-# class TenantMixin:
-#     """Ensures every table is partitioned by company."""
-#     company_id: Mapped[uuid.UUID] = mapped_column(index=True, nullable=False)
-
-# class TimestampMixin:
-#     """Standard audit fields for all tables."""
-#     created_at: Mapped[datetime] = mapped_column(
-#         DateTime(timezone=True), server_default=func.now()
-#     )
-#     updated_at: Mapped[datetime] = mapped_column(
-#         DateTime(timezone=True), 
-#         server_default=func.now(), 
-#         onupdate=func.now()
-#     )
-
 class BaseModel(Base):
     __abstract__ = True
 
