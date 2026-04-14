@@ -52,15 +52,15 @@ def agents_verify(data: AgentVerificationRequest):
 
 
 @app.get("/api/v1/internal/providers")
-def agents_verifyproviders():
+async def agents_verifyproviders():
     return [provider.value for provider in LLMProviders]
 
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"status": "online", "message": "Nucleus AI Brain is active"}
 
 
 @app.get("/health")
-def health_check():
+async def health_check():
     return {"status": "healthy"}
