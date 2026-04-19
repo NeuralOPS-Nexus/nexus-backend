@@ -13,7 +13,7 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy from the context root (NeuralOPSNexus/)
-COPY modules/nexus-ai/docker/dev/requirements.txt .
+COPY docker/dev/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Final Runtime (The clean, dev-ready engine)

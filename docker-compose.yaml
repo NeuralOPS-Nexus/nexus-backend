@@ -5,7 +5,7 @@ services:
     container_name: nexus-nucleus
     build:
       context: ./modules/nexus-nucleus
-      dockerfile: Dockerfile
+      dockerfile: ./docker/dev/Dockerfile.nexus-nucleus
     ports:
       - "8003:8000"
     volumes:
@@ -32,7 +32,7 @@ services:
     container_name: nexus-ai
     build:
       context: ./modules/nexus-ai
-      dockerfile: Dockerfile
+      dockerfile: ./docker/dev/Dockerfile.nexus-ai
     ports:
       - "8000:8000"
     volumes:
