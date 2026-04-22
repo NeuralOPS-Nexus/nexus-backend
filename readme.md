@@ -66,3 +66,5 @@ Test: Verify the build passes in Docker using docker compose build.
 Nucleus Debugging: By default, the Nucleus service is set to tail -f /dev/null. To start the server manually for debugging, use docker exec -it nexus-nucleus python3 -m uvicorn apps.main:app --host 0.0.0.0.
 
 Database Volumes: Data is persisted locally in ./data/postgres_data and ./data/chroma_data.
+
+Usman
