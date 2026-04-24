@@ -68,3 +68,5 @@ Nucleus Debugging: By default, the Nucleus service is set to tail -f /dev/null. 
 Database Volumes: Data is persisted locally in ./data/postgres_data and ./data/chroma_data.
 
 Usman
+
+Ali
