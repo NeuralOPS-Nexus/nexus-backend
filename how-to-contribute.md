@@ -115,3 +115,4 @@ A maintainer will review your code. Be prepared to answer questions or make requ
 Once approved, a maintainer will merge your branch into dev.
 
 Thank you for contributing! Let's build the Nucleus.
+Noaman Faisal Bin Badar
