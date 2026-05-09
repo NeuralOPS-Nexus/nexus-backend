@@ -162,11 +162,3 @@ class AgentVerificationRequest(BaseModel):
 
 class AgentVerificationResponse(BaseModel):
     pass
-
-
-class EmbedMessagesRequest(BaseModel):
-    messages: list[str] = Field(description="A list of messages to embed")
-
-
-class EmbedMessagesResponse(BaseModel):
-    pass
